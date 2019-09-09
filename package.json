@@ -1,0 +1,28 @@
+{
+  "name": "command-line",
+  "version": "1.0.0",
+  "description": "test",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./src/test.js",
+    "branch": "node ./src/branch.js",
+    "publish": "node ./src/publish.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EzioW/command-line.git"
+  },
+  "author": "EzioW",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EzioW/command-line/issues"
+  },
+  "homepage": "https://github.com/EzioW/command-line#readme",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "inquirer": "^7.0.0"
+  },
+  "devDependencies": {
+    "eslint-config-seraph": "^1.0.0"
+  }
+}
