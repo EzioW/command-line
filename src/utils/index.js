@@ -26,11 +26,11 @@ const runInquirer = (promptList, taskList) => {
   taskList.reduce((p, n) => p.then(n), inquirer.prompt(promptList));
 };
 
-const runCommand = (command, options) => execSync(command, options);
-
-const getCurBranch = () => runCommand('git symbolic-ref --short -q HEAD', {
+const runCommand = (command, options = {
   encoding: 'utf-8',
-}).split('\n')[0];
+}) => execSync(command, options);
+
+const getCurBranch = () => runCommand('git symbolic-ref --short -q HEAD').split('\n')[0];
 
 module.exports = {
   runCommand,
