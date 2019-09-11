@@ -8,15 +8,15 @@ const getInfoFromPackage = (packageStr, key) => {
 };
 
 const getVersionDetail = version => {
-  const [main, sub] = version.split('-');
+  const [main] = version.split('-');
   const [major, minor, patch] = main.split('.');
-  const [type, subVersion] = sub.split('.');
+  // const [type, subVersion] = sub.split('.');
   return {
     major,
     minor,
     patch,
-    type,
-    subVersion,
+    // type,
+    // subVersion,
   };
 };
 

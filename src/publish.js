@@ -10,6 +10,8 @@ const {
 
 const curBranch = getCurBranch();
 
+console.log(curBranch);
+
 const typePrompt = {
   type: 'list',
   name: 'type',
@@ -24,7 +26,7 @@ const typePrompt = {
 const versionTypePrompt = {
   type: 'list',
   name: 'versionType',
-  message: '选择发布版本',
+  message: 'choose publish version type',
   choices: [
     'alpha',
     'beta',
@@ -63,17 +65,17 @@ const genVersion = ({ type, versionType }) => {
   const latestVersion = versions.match(/(?<=')(.)+?(?=')/g).pop();
   let newVersion = '';
 
-  // console.log(curStableVersion, latestVersion);
+  console.log(curStableVersion, latestVersion);
 
   if (versionType === 'stable') { // master publish
     const { major, minor, patch } = getVersionDetail(curStableVersion);
     newVersion = '';
     switch (type) {
       case 'update':
-        newVersion = `${+major + 1}.${minor}.${patch}`;
+        newVersion = `${+major + 1}.0.0`;
         break;
       case 'feature':
-        newVersion = `${major}.${+minor + 1}.${patch}`;
+        newVersion = `${major}.${+minor + 1}.0`;
         break;
       case 'bugfix':
         newVersion = `${major}.${minor}.${+patch + 1}`;
@@ -83,9 +85,9 @@ const genVersion = ({ type, versionType }) => {
   } else { // branch publish
     const { major, minor, patch } = getVersionDetail(latestVersion);
     if (type === 'update') {
-      newVersion = handleVersion(`${+major + 1}.${minor}.${patch}`, versions, versionType);
+      newVersion = handleVersion(`${+major + 1}.0.0`, versions, versionType);
     } else if (type === 'feature') {
-      newVersion = handleVersion(`${major}.${+minor + 1}.${patch}`, versions, versionType);
+      newVersion = handleVersion(`${major}.${+minor + 1}.0`, versions, versionType);
     } else if (type === 'bugfix') {
       newVersion = handleVersion(`${major}.${minor}.${+patch + 1}`, versions, versionType);
     }
@@ -100,7 +102,6 @@ const changeFile = ({ type, versionType, newVersion }) => {
   if (versionType === 'stable') {
     let changelog = readFile('./changelog.md');
     changelog = changelog.concat(`${newVersion}\n`);
-    console.log(changelog);
     writeFile('./changelog.md', changelog);
   }
 };
