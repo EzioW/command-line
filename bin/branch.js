@@ -42,7 +42,7 @@ const createBranch = ({ type, branchName }) => {
 
 const saveBranchInfo = ({ type, newBranchName }) => {
   const stableVersion = getStableVersion();
-  const [major, minor, patch] = getVersionDetail(stableVersion);
+  const { major, minor, patch } = getVersionDetail(stableVersion);
   let branchBaseVersion = '';
   switch (type) {
     case 'update':
