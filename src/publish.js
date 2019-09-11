@@ -2,7 +2,7 @@ const {
   runCommand,
   getCurBranch,
   readFile,
-  // writeFile,
+  writeFile,
   getInfoFromPackage,
   getVersionDetail,
   runInquirer,
@@ -43,41 +43,67 @@ const checkOption = ({ type, versionType }) => {
   }
 };
 
+const handleVersion = (version, versions, versionType) => {
+  const reg = new RegExp(`${version}-${versionType}.(\\d+)?`, 'g');
+  const curVersion = versions.match(reg);
+  if (curVersion === null) {
+    return `${version}-${versionType}.1`;
+  }
+  const typeVersion = curVersion[0].split('.').pop();
+  return `${version}-${versionType}.${+typeVersion + 1}`;
+};
+
 const genVersion = ({ type, versionType }) => {
   const packageStr = readFile('./package.json');
-  const moduleName = getInfoFromPackage(packageStr, 'name');
+  // const moduleName = getInfoFromPackage(packageStr, 'name');
+  const moduleName = '@liepin/cnpm-react-form-fe';
   const versions = runCommand(`npm view ${moduleName} versions`);
   // get current stable version
-  const curVersion = versions.match(/(?<=')(.)+?(?=')/g).pop();
-  const { major, minor, patch } = getVersionDetail(curVersion);
+  const curStableVersion = versions.match(/(\d+?\.){2}\d+?(?=')/g).pop();
+  const latestVersion = versions.match(/(?<=')(.)+?(?=')/g).pop();
   let newVersion = '';
 
+  // console.log(curStableVersion, latestVersion);
+
   if (versionType === 'stable') { // master publish
+    const { major, minor, patch } = getVersionDetail(curStableVersion);
     newVersion = '';
     switch (type) {
       case 'update':
-        newVersion = `${major + 1}.${minor}.${patch}`;
+        newVersion = `${+major + 1}.${minor}.${patch}`;
         break;
       case 'feature':
-        newVersion = `${major}.${minor + 1}.${patch}`;
+        newVersion = `${major}.${+minor + 1}.${patch}`;
         break;
       case 'bugfix':
-        newVersion = `${major}.${minor}.${patch + 1}`;
+        newVersion = `${major}.${minor}.${+patch + 1}`;
         break;
       default:
     }
   } else { // branch publish
+    const { major, minor, patch } = getVersionDetail(latestVersion);
     if (type === 'update') {
-
+      newVersion = handleVersion(`${+major + 1}.${minor}.${patch}`, versions, versionType);
+    } else if (type === 'feature') {
+      newVersion = handleVersion(`${major}.${+minor + 1}.${patch}`, versions, versionType);
+    } else if (type === 'bugfix') {
+      newVersion = handleVersion(`${major}.${minor}.${+patch + 1}`, versions, versionType);
     }
   }
 
-  return newVersion;
+  console.log(newVersion);
+
+  return { type, versionType, newVersion };
 };
 
-// const changeFile = version => {
-
-// };
+const changeFile = ({ type, versionType, newVersion }) => {
+  if (versionType === 'stable') {
+    let changelog = readFile('./changelog.md');
+    changelog = changelog.concat(`${newVersion}\n`);
+    console.log(changelog);
+    writeFile('./changelog.md', changelog);
+  }
+};
 
 runInquirer([
   typePrompt,
@@ -85,5 +111,5 @@ runInquirer([
 ], [
   checkOption,
   genVersion,
-  // changeFile,
+  changeFile,
 ]);

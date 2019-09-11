@@ -21,6 +21,7 @@ const getVersionDetail = version => {
 };
 
 const readFile = path => fs.readFileSync(path, 'utf-8');
+const writeFile = (path, content) => fs.writeFileSync(path, content, 'utf-8');
 
 const runInquirer = (promptList, taskList) => {
   taskList.reduce((p, n) => p.then(n), inquirer.prompt(promptList));
@@ -38,5 +39,6 @@ module.exports = {
   getInfoFromPackage,
   getVersionDetail,
   readFile,
+  writeFile,
   runInquirer,
 };
