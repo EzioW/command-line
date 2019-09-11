@@ -4,9 +4,9 @@
   "description": "test",
   "main": "index.js",
   "scripts": {
-    "test": "node ./src/test.js",
-    "branch": "node ./src/branch.js",
-    "publish": "node ./src/publish.js"
+    "test": "node ./bin/test.js",
+    "branch": "node ./bin/branch.js",
+    "publish": "node ./bin/publish.js"
   },
   "repository": {
     "type": "git",
