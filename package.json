@@ -1,6 +1,6 @@
 {
   "name": "command-line",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "description": "test",
   "main": "index.js",
   "scripts": {
@@ -14,6 +14,10 @@
   },
   "author": "EzioW",
   "license": "ISC",
+  "bin": {
+    "seraph-branch": "./bin/branch.js",
+    "seraph-publish": "./bin/publish.js"
+  },
   "bugs": {
     "url": "https://github.com/EzioW/command-line/issues"
   },
