@@ -1,36 +1,7 @@
-const {
-  readFile,
-  getInfoFromPackage,
-  getVersionDetail,
-  runInquirer,
-} = require('./utils');
+const fs = require('fs');
 
-const typePrompt = {
-  type: 'list',
-  name: 'type',
-  message: '选择分支类型',
-  choices: [
-    { name: 'feature（minor）', value: 'feature' },
-    { name: 'bugfix（patch）', value: 'bugfix' },
-  ],
-};
-
-const versionPrompt = {
-  type: 'list',
-  name: 'versionType',
-  message: '选择发布版本',
-  choices: [
-    'alpha',
-    'beta',
-  ],
-};
-
-const genVersion = ({ type, versionType }) => {
-  const packageStr = readFile('./package.json');
-  const curVersion = getInfoFromPackage(packageStr, 'version');
-  console.log(curVersion);
-};
-
-runInquirer([typePrompt, versionPrompt], [
-  genVersion,
-]);
+if (!fs.existsSync('./seraph')) {
+  fs.mkdirSync('./seraph');
+  const info = { 'feature/test': ['0.1.0'] };
+  fs.writeFileSync('./seraph/branchInfo.json', JSON.stringify(info), { encoding: 'utf-8' });
+}
