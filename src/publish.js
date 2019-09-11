@@ -1,17 +1,18 @@
 const {
-  // runCommand,
   getCurBranch,
   readFile,
   writeFile,
   getInfoFromPackage,
   getVersionDetail,
   runInquirer,
+  runCommand,
 } = require('./utils');
 
 const curBranch = getCurBranch();
 const isMaster = curBranch === 'master';
 
 const branchInfoPath = './seraph/branchInfo.json';
+const packagePath = './package.json';
 let branchInfo = {};
 try {
   branchInfo = JSON.parse(readFile(branchInfoPath));
@@ -19,32 +20,27 @@ try {
   console.error('can not find branch versions info , make sure this branch is created by seraph command line');
 }
 
-const versions = branchInfo[curBranch];
-if (versions === undefined) {
-  throw Error('can not find branch versions info , make sure this branch is created by seraph command line');
+let versions = '';
+let branchs = [];
+if (isMaster) {
+  branchs = runCommand('git branch').match(/(\w+)\/(\w+)|\w+/g).filter(item => item !== 'master');
+  if (branchs.length === 0) {
+    throw Error('no branch can be published now');
+  }
+} else {
+  versions = branchInfo[curBranch];
+  if (versions === undefined) {
+    throw Error('can not find branch versions info , make sure this branch is created by seraph command line');
+  }
 }
 
 const branchBaseVersion = versions.slice(0, 1)[0];
 const latestVersion = versions.slice(-1)[0];
 
-const packageStr = readFile('./package.json');
-// // const moduleName = getInfoFromPackage(packageStr, 'name');
-// const moduleName = '@liepin/cnpm-react-form-fe';
-// const versionsStr = runCommand(`npm view ${moduleName} versions`);
-// const versionsList = versionsStr.match(/(\d+?\.){2}\d+?((-\w+)?.\d+?)?(?=')/g);
-// // let changelog = readFile('./changelog.md');
-// // const versions = changelog.match(/(?<=## )(.+)?/g);
-// // get current stable version
-// const curStableVersion = versionsStr.match(/(\d+?\.){2}\d+?(?=')/g).pop();
-// const latestVersion = versionsList.pop();
-const curStableVersion = getInfoFromPackage(packageStr, 'version'); // changelog.match(/(\d+?\.){2}\d+?\n/g).pop();
-// // const latestVersion = changelog.match(/(?<=## )(.+)?/g).pop();
-
-// console.log(curStableVersion, latestVersion, versionsList);
-// console.log([...new Set(versionsList.filter(item => item > curStableVersion).map(item => item.split('-')[0]))]);
+const packageStr = readFile(packagePath);
+const curStableVersion = getInfoFromPackage(packageStr, 'version');
 
 const typeList = [
-  { name: 'update（major）', value: 'update' },
   { name: 'feature（minor）', value: 'feature' },
   { name: 'bugfix（patch）', value: 'bugfix' },
 ];
@@ -53,7 +49,16 @@ const typePrompt = {
   type: 'list',
   name: 'type',
   message: 'choose publish type',
-  choices: isMaster ? typeList : typeList.slice(1, 3),
+  choices: typeList.slice(1, 3),
+  when: () => !isMaster,
+};
+
+const branchPrompt = {
+  type: 'list',
+  name: 'branch',
+  message: 'choose publish branch nmae',
+  choices: branchs,
+  when: () => isMaster,
 };
 
 const versionTypePrompt = {
@@ -68,24 +73,6 @@ const versionTypePrompt = {
   when: () => !isMaster,
 };
 
-// const featureListPrompt = {
-//   type: 'list',
-//   name: 'feature',
-//   message: 'choose feature for bug fix',
-//   choices: [...new Set(versionsList.filter(item => item > curStableVersion).map(item => item.split('-')[0]))],
-//   when: ({ type }) => type === 'bugfix',
-// };
-
-const checkOption = ({ type, versionType }) => {
-  const isMasterErr = isMaster && versionType !== 'stable';
-  const isBranchErr = !isMaster && versionType === 'stable';
-  if (isMasterErr || isBranchErr) {
-    throw Error('stable version only can be published in branch master!');
-  } else {
-    return { type, versionType };
-  }
-};
-
 const fixEmptyVersion = (version, versionType) => {
   const reg = new RegExp(`${version}-${versionType}.(\\d+)?`, 'g');
   const curVersion = versions.toString().match(reg);
@@ -96,13 +83,13 @@ const fixEmptyVersion = (version, versionType) => {
   return `${version}-${versionType}.${+typeVersion + 1}`;
 };
 
-const genVersion = ({ type, versionType }) => {
+const genVersion = ({ type, branch, versionType }) => {
   let newVersion = '';
 
   if (isMaster) { // master publish
     const { major, minor, patch } = getVersionDetail(curStableVersion);
     newVersion = '';
-    switch (type) {
+    switch (branch.split('/')[0]) {
       case 'update':
         newVersion = `${+major + 1}.0.0`;
         break;
@@ -124,28 +111,36 @@ const genVersion = ({ type, versionType }) => {
       newVersion = fixEmptyVersion(`${major}.${latestMinor}.${haveUpdated ? 1 : +patch + 1}`, versionType);
     }
   }
-
-  return { newVersion };
+  return { branch, newVersion };
 };
 
-const changeFile = ({ newVersion }) => {
+const changeFile = ({ branch, newVersion }) => {
   let changelog = readFile('./changelog.md');
   changelog = changelog.concat(`## ${newVersion}\n\n`);
   writeFile('./changelog.md', changelog);
   if (isMaster) {
-    delete branchInfo[curBranch];
+    delete branchInfo[branch];
+    writeFile(branchInfoPath, JSON.stringify(branchInfo));
+    const newPackage = packageStr.replace(/(?<="version": ")(.+)(?=")/g, () => newVersion);
+    writeFile(packagePath, newPackage);
+  } else {
+    branchInfo[curBranch].push(newVersion);
     writeFile(branchInfoPath, JSON.stringify(branchInfo));
   }
-  branchInfo[curBranch].push(newVersion);
-  writeFile(branchInfoPath, JSON.stringify(branchInfo));
+  return newVersion;
+};
+
+const publish = newVersion => {
+  runCommand(`git add . && git commit -m 'publish version ${newVersion}' && git push`);
+  runCommand('npm publish');
 };
 
 runInquirer([
   typePrompt,
+  branchPrompt,
   versionTypePrompt,
-  // featureListPrompt,
 ], [
-  checkOption,
   genVersion,
   changeFile,
+  publish,
 ]);
