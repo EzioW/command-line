@@ -1,12 +1,12 @@
 {
   "name": "seraph-release",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "description": "test",
   "main": "index.js",
   "scripts": {
     "test": "node ./bin/test.js",
     "branch": "node ./bin/branch.js",
-    "publish": "node ./bin/publish.js"
+    "pub": "node ./bin/publish.js"
   },
   "repository": {
     "type": "git",
