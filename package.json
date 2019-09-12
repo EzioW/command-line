@@ -1,7 +1,12 @@
 {
   "name": "seraph-release",
   "version": "0.1.0",
-  "description": "test",
+  "description": "Auto create and publish modules cli, Maintenance chnage log",
+  "keywords": [
+    "seraph",
+    "release",
+    "changelog"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "node ./bin/test.js",

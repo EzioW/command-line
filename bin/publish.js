@@ -119,8 +119,8 @@ const changeFile = ({ branch, newVersion }) => {
   changelog = changelog.concat(`## ${newVersion}\n\n`);
   writeFile('./changelog.md', changelog);
   if (isMaster) {
-    delete branchInfo[branch];
-    writeFile(branchInfoPath, JSON.stringify(branchInfo));
+    // delete branchInfo[branch];
+    // writeFile(branchInfoPath, JSON.stringify(branchInfo));
     const newPackage = packageStr.replace(/(?<="version": ")(.+)(?=")/g, () => newVersion);
     writeFile(packagePath, newPackage);
   } else {
