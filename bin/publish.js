@@ -114,13 +114,11 @@ const genVersion = ({ type, branch, versionType }) => {
   return { branch, newVersion };
 };
 
-const changeFile = ({ branch, newVersion }) => {
+const changeFile = ({ newVersion }) => {
   let changelog = readFile('./changelog.md');
   changelog = changelog.concat(`## ${newVersion}\n\n`);
   writeFile('./changelog.md', changelog);
   if (isMaster) {
-    // delete branchInfo[branch];
-    // writeFile(branchInfoPath, JSON.stringify(branchInfo));
     const newPackage = packageStr.replace(/(?<="version": ")(.+)(?=")/g, () => newVersion);
     writeFile(packagePath, newPackage);
   } else {
@@ -131,10 +129,25 @@ const changeFile = ({ branch, newVersion }) => {
 };
 
 const publish = newVersion => {
-  // const published = runCommand('npm publish');
-  // console.log(published);
+  const published = runCommand('npm publish');
+  console.log(typeof published);
   // runCommand(`git add . && git commit -m 'publish version ${newVersion}' && git push`);
-  console.info(`publish version${newVersion}`);
+  // console.info(`publish version${newVersion}`);
+  return { newVersion };
+};
+
+const afterCheck = {
+  type: 'list',
+  name: 'pubSuccess',
+  message: 'if publish success',
+  choices: ['yes', 'no'],
+};
+
+const afterPush = (...a) => {
+  console.log(...a);
+  // if (pubSucacess) {
+  //   runCommand(`git add . && git commit -m 'publish version ${newVersion}' && git push`);
+  // }
 };
 
 runInquirer([
@@ -145,4 +158,7 @@ runInquirer([
   genVersion,
   changeFile,
   publish,
-]);
+]).then((...data) => {
+  console.log(...data);
+  runInquirer([afterCheck], [afterPush]);
+});

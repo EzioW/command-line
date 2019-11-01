@@ -10,9 +10,7 @@ const runCommand = (command, options = {
   encoding: 'utf-8',
 }) => execSync(command, options);
 
-const runInquirer = (promptList, taskList) => {
-  taskList.reduce((p, n) => p.then(n), inquirer.prompt(promptList));
-};
+const runInquirer = (promptList, taskList) => taskList.reduce((p, n) => p.then(n), inquirer.prompt(promptList));
 
 const getCurBranch = () => runCommand('git symbolic-ref --short -q HEAD').split('\n')[0];
 
