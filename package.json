@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EzioW/command-line.git"
+    "url": "git+https://github.com/EzioW/seraph-release.git"
   },
   "author": "EzioW",
   "license": "ISC",
