@@ -24,9 +24,9 @@
     "seraph-p": "./bin/publish.js"
   },
   "bugs": {
-    "url": "https://github.com/EzioW/command-line/issues"
+    "url": "https://github.com/EzioW/seraph-release/issues"
   },
-  "homepage": "https://github.com/EzioW/command-line#readme",
+  "homepage": "https://github.com/EzioW/seraph-release#readme",
   "dependencies": {
     "chalk": "^2.4.2",
     "inquirer": "^7.0.0"
